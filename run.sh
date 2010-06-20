@@ -48,7 +48,7 @@ do
                 # if the software previously ran longer than 180 seconds
                 # keep a copy of the old version
                 cp ircDDB.jar ircDDB.jar.lastKnownGood
-                cp app.jar app.jar.lastKnownGood
+                cp app2.jar app2.jar.lastKnownGood
         fi
         curl -O $URL/ircDDB.jar
         curl -O $URL/app2.jar
