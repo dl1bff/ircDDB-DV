@@ -1,0 +1,17 @@
+
+
+keystore "ircDDB.keystore";
+
+grant codeBase "file:ircDDB.jar", signedBy "dl1bff" {
+          permission java.security.AllPermission;
+};
+
+grant codeBase "file:app2.jar", signedBy "dl1bff" {
+          permission java.security.AllPermission;
+};
+
+grant codeBase "file:/opt/dstarmon/postgresql-8.4-701.jdbc3.jar" {
+          permission java.security.AllPermission;
+};
+
+
