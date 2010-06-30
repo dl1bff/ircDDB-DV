@@ -2,7 +2,7 @@
 
 
 classfiles:
-	javac -cp ../ircDDB/ircDDB.jar net/ircddb/dv/*.java
+	javac -cp ../ircDDB/ircDDB2.jar net/ircddb/dv/*.java
 
 classfiles_beta:
 	javac -cp ../ircDDB/ircDDB_beta.jar net/ircddb/dv/*.java

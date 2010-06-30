@@ -39,10 +39,10 @@ import java.util.Properties;
 
 import java.util.regex.Pattern;
 
-import de.mdx.ircDDB.IRCApplication;
-import de.mdx.ircDDB.IRCMessage;
-import de.mdx.ircDDB.IRCMessageQueue;
-import de.mdx.ircDDB.IRCDDBExtApp;
+import net.ircDDB.IRCApplication;
+import net.ircDDB.IRCMessage;
+import net.ircDDB.IRCMessageQueue;
+import net.ircDDB.IRCDDBExtApp;
 
 
 
