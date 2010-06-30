@@ -38,7 +38,7 @@ do
  if [ "$D" -lt 180 ] && [ "$LKG" = 0 ]
  then
         echo "respawning too quickly, going back to old version"
-        cp ircDDB.jar.lastKnownGood ircDDB.jar
+        cp ircDDB2.jar.lastKnownGood ircDDB2.jar
         cp app2.jar.lastKnownGood app2.jar
         sleep 100
         LKG=1
@@ -47,21 +47,21 @@ do
         then
                 # if the software previously ran longer than 180 seconds
                 # keep a copy of the old version
-                cp ircDDB.jar ircDDB.jar.lastKnownGood
+                cp ircDDB2.jar ircDDB2.jar.lastKnownGood
                 cp app2.jar app2.jar.lastKnownGood
         fi
-        curl -O $URL/ircDDB.jar
+        curl -O $URL/ircDDB2.jar
         curl -O $URL/app2.jar
         LKG=0
  fi
 
  SECURITY="-Djava.security.manager -Djava.security.policy=ircDDB.policy"
- CP="app2.jar:ircDDB.jar:/opt/dstarmon/postgresql-8.4-701.jdbc3.jar"
+ CP="app2.jar:ircDDB2.jar:/opt/dstarmon/postgresql-8.4-701.jdbc3.jar"
  JAVA=/opt/products/dstar/j2se/jre/bin/java
 
  D1=` date '+%s' `
 
- $JAVA $SECURITY -cp $CP de.mdx.ircDDB.IRCDDBApp
+ $JAVA $SECURITY -cp $CP net.ircDDB.IRCDDBApp
 
  D2=` date '+%s' `
 

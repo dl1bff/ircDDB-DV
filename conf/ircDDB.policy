@@ -2,7 +2,7 @@
 
 keystore "ircDDB.keystore";
 
-grant codeBase "file:ircDDB.jar", signedBy "dl1bff" {
+grant codeBase "file:ircDDB2.jar", signedBy "dl1bff" {
           permission java.security.AllPermission;
 };
 
