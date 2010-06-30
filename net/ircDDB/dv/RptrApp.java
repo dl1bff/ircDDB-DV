@@ -44,6 +44,8 @@ import net.ircDDB.IRCMessage;
 import net.ircDDB.IRCMessageQueue;
 import net.ircDDB.IRCDDBExtApp;
 
+import net.ircDDB.Dbg;
+
 
 
 public class RptrApp implements IRCDDBExtApp
@@ -73,7 +75,7 @@ public class RptrApp implements IRCDDBExtApp
 
 		if (state < 2)
 		{
-			System.out.println("db not ready");
+			Dbg.println(Dbg.WARN, "db not ready");
 			return;
 		}
 
@@ -111,12 +113,12 @@ public class RptrApp implements IRCDDBExtApp
 
 					if (r != 1)
 					{
-					System.out.println("DBClient/insert sync_gip unexpected value "+r);
+					 Dbg.println(Dbg.WARN, "DBClient/insert sync_gip unexpected value "+r);
 					}
 				}
 				else
 				{
-					System.out.println("DBClient/select zonerp_cs unexpected entry or rs==null");
+					Dbg.println(Dbg.WARN, "DBClient/select zonerp_cs unexpected entry or rs==null");
 				}
 
 				if (rs!=null)
@@ -138,12 +140,12 @@ public class RptrApp implements IRCDDBExtApp
 
 					if (r != 1)
 					{
-					System.out.println("DBClient/insert unsync_gip unexpected value "+r);
+					 Dbg.println(Dbg.WARN, "DBClient/insert unsync_gip unexpected value "+r);
 					}
 				}
 				else
 				{
-					System.out.println("DBClient/select zonerp_cs unexpected entry or rs==null");
+					Dbg.println(Dbg.WARN, "DBClient/select zonerp_cs unexpected entry or rs==null");
 				}
 
 				if (rs!=null)
@@ -158,7 +160,7 @@ public class RptrApp implements IRCDDBExtApp
 			}
 			catch (SQLException e)
 			{
-				System.out.println("DBClient/executeQuery: " + e);
+				Dbg.println(Dbg.WARN, "DBClient/executeQuery: " + e);
 				state = 1;
 				return;
 			}
@@ -175,7 +177,7 @@ public class RptrApp implements IRCDDBExtApp
 	{
 		if (state < 2)
 		{
-			System.out.println("wait for db");
+			Dbg.println(Dbg.INFO, "wait for db");
 
 			try
 			{
@@ -183,12 +185,12 @@ public class RptrApp implements IRCDDBExtApp
 			}
 			catch ( InterruptedException e )
 			{
-				System.out.println(e);
+				Dbg.println(Dbg.WARN, "sleep interrupted " + e);
 			}
 
 			if (state < 2)
 			{
-				System.out.println("db not ready");
+				Dbg.println(Dbg.ERR, "db not ready");
 				return null;
 			}
 		}
@@ -203,7 +205,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (SQLException e)
 		{
-			System.out.println("DBClient/executeQuery: " + e);
+			Dbg.println(Dbg.WARN, "DBClient/executeQuery: " + e);
 			state = 1;  // disconnect
 			return null;
 		}
@@ -230,7 +232,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (SQLException e)
 		{
-			System.out.println("DBClient/ResultSet: " + e);
+			Dbg.println(Dbg.WARN, "DBClient/ResultSet: " + e);
 			state = 1;
 			return null;
 		}
@@ -244,7 +246,7 @@ public class RptrApp implements IRCDDBExtApp
 	{
 		if (state < 2)
 		{
-			System.out.println("db not ready");
+			Dbg.println(Dbg.WARN, "db not ready");
 			return null;
 		}
 		
@@ -270,7 +272,7 @@ public class RptrApp implements IRCDDBExtApp
 
 			if (rs == null)
 			{
-				System.out.println("DBClient/ResultSet=null " );
+				Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
 				state = 1;
 				return null;
 			}
@@ -315,7 +317,7 @@ public class RptrApp implements IRCDDBExtApp
 
 			if (rs == null)
 			{
-				System.out.println("DBClient/ResultSet=null " );
+				Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
 				state = 1;
 				return null;
 			}
@@ -338,7 +340,7 @@ public class RptrApp implements IRCDDBExtApp
 
 			if (rs == null)
 			{
-				System.out.println("DBClient/ResultSet=null " );
+				Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
 				state = 1;
 				return null;
 			}
@@ -363,14 +365,14 @@ public class RptrApp implements IRCDDBExtApp
 
 					if (rs == null)
 					{
-						System.out.println("DBClient/ResultSet=null " );
+						Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
 						state = 1;
 						return null;
 					}
 	
 					if (rs.next())
 					{
-						System.out.println("DBClient/select target_cs unexpected entry");
+						Dbg.println(Dbg.WARN, "DBClient/select target_cs unexpected entry");
 					}
 					else
 					{
@@ -384,7 +386,7 @@ public class RptrApp implements IRCDDBExtApp
 
                                                 if (rs == null)
                                                 {
-                                                        System.out.println("DBClient/ResultSet=null " );
+                                                        Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
                                                         state = 1;
                                                         return null;
                                                 }
@@ -401,7 +403,7 @@ public class RptrApp implements IRCDDBExtApp
 								  tmpZoneCS + "', '" + tmpZoneCS + "', '0.0.0.0', false)");
 							if (r != 1)
 							{
-								System.out.println("DBClient/insert2 unexpected value " + r);
+							 Dbg.println(Dbg.WARN, "DBClient/insert2 unexpected value " + r);
 							}
 
 							rs.close();
@@ -413,7 +415,7 @@ public class RptrApp implements IRCDDBExtApp
 
 							if (rs == null)
 							{
-								System.out.println("DBClient/ResultSet=null " );
+								Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
 								state = 1;
 								return null;
 							}
@@ -448,7 +450,7 @@ public class RptrApp implements IRCDDBExtApp
 				  zoneCS + "')" );
 				if (r != 1)
 				{
-					System.out.println("DBClient/insert unexpected value " + r);
+					Dbg.println(Dbg.WARN, "DBClient/insert unexpected value " + r);
 				}
 			}
 			else
@@ -462,16 +464,19 @@ public class RptrApp implements IRCDDBExtApp
 
 				if (r != 1)
 				{
-					System.out.println("DBClient/update1 unexpected value " + r);
+					Dbg.println(Dbg.WARN, "DBClient/update1 unexpected value " + r);
 				}
 			}
 
 			if (!zoneCS.equals("NOCALL99"))
 			{
-				sql.executeUpdate (
+				int r = sql.executeUpdate (
 				"update sync_mng set arearp_cs='" + areaCS +
 				 "', zonerp_cs='" + zoneCS +
-				 "' where target_cs='" + targetCS + "'");
+				 "' where target_cs='" + targetCS + "'" + 
+				 " and last_mod_time < '" + lastModTime + "'");
+
+				Dbg.println(Dbg.DBG1, "update sync_mng (" + targetCS + "): " + r);
 			}
 
 			} // if (!doNotUpdate)
@@ -479,7 +484,7 @@ public class RptrApp implements IRCDDBExtApp
                 }
                 catch (SQLException e)
                 {
-                        System.out.println("DBClient/executeQuery: " + e);
+                        Dbg.println(Dbg.WARN, "DBClient/executeQuery: " + e);
                         state = 1;
                         return null;
                 }
@@ -526,17 +531,17 @@ public class RptrApp implements IRCDDBExtApp
 
 		if (fixTables)
 		{
-			System.out.println("Missing repeater entries in 'sync_mng' and 'sync_gip' "+
+			Dbg.println(Dbg.INFO, "Missing repeater entries in 'sync_mng' and 'sync_gip' "+
 				"will be created automatically.");
 
 			if (fixUnsyncGIP)
 			{
-			System.out.println("Missing repeater entries in 'unsync_gip' "+
+			 Dbg.println(Dbg.INFO, "Missing repeater entries in 'unsync_gip' "+
 					"will be created automatically.");
 			}	
 			else
 			{
-				System.out.println("The table 'unsync_gip' will not be changed.");
+				Dbg.println(Dbg.INFO, "The table 'unsync_gip' will not be changed.");
 			}
 		}
 	}
@@ -616,7 +621,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (ClassNotFoundException e)
 		{
-			System.out.println("DBClient/ClassLoader: " + e);
+			Dbg.println(Dbg.ERR, "DBClient/ClassLoader: " + e);
 			return false;
 		}
 
@@ -627,7 +632,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (SQLException e)
 		{
-			System.out.println("DBClient/getConnection: " + e);
+			Dbg.println(Dbg.ERR, "DBClient/getConnection: " + e);
 			return false;
 		}
 
@@ -637,7 +642,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (SQLException e)
 		{
-			System.out.println("DBClient/getMetaData: " + e);
+			Dbg.println(Dbg.ERR, "DBClient/getMetaData: " + e);
 			return false;
 		}
 
@@ -647,7 +652,7 @@ public class RptrApp implements IRCDDBExtApp
 		}
 		catch (SQLException e)
 		{
-			System.out.println("DBClient/createStatement: " + e);
+			Dbg.println(Dbg.ERR, "DBClient/createStatement: " + e);
 			return false;
 		}
 
@@ -666,7 +671,7 @@ public class RptrApp implements IRCDDBExtApp
 			}
 			catch (SQLException e)
 			{
-				System.out.println("DBClient/close: " + e);
+				Dbg.println(Dbg.WARN, "DBClient/close: " + e);
 			}
 	
 		}
@@ -687,10 +692,10 @@ public class RptrApp implements IRCDDBExtApp
 			switch(state)
 			{
 			case 0:
-				System.out.println("DBClient: connect request");
+				Dbg.println(Dbg.INFO, "DBClient: connect request");
 				if (init())
 				{
-					System.out.println("DBClient: connected");
+					Dbg.println(Dbg.INFO, "DBClient: connected");
 					state = 2;
 				}
 				else
@@ -737,7 +742,7 @@ public class RptrApp implements IRCDDBExtApp
 			}
 			catch ( InterruptedException e )
 			{
-				System.out.println(e);
+				Dbg.println(Dbg.WARN, "sleep interrupted " + e);
 			}
 		}
 
