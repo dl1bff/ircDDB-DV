@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import net.ircDDB.IRCApplication;
 import net.ircDDB.IRCMessage;
@@ -68,6 +69,50 @@ public class RptrApp implements IRCDDBExtApp
 
 	boolean fixTables;
 	boolean fixUnsyncGIP;
+
+       boolean insertUsers;
+
+       Pattern areaPattern;
+       Pattern targetPattern;
+
+       String repeaterCall;
+
+
+         boolean isValidCallSign(String s, Pattern p, int min_len, int max_len)
+         {
+
+                 if (s.length() != 8)
+                 {
+                         Dbg.println(Dbg.DBG1, "(" + s + ") not 8 chars");
+                         return false;
+                 }
+
+                 int len = s.substring(0,7).trim().length();
+
+                 if (len < min_len)
+                 {
+                         Dbg.println(Dbg.DBG1, "(" + s + ") less than " + min_len + " chars");
+                         return false;
+                 }
+
+                 if (len > max_len)
+                 {
+                         Dbg.println(Dbg.DBG1, "(" + s + ") more than " + max_len + " chars");
+                         return false;
+                 }
+
+                 Matcher m = p.matcher(s);
+
+                 if (m.matches())
+                 {
+                         return true;
+                 }
+
+                 Dbg.println(Dbg.DBG1, "(" + s + ") does not match pattern");
+                 return false;
+         }
+
+
 	
 	public void userJoin (String nick, String name, String host)
 	{
@@ -242,7 +287,7 @@ public class RptrApp implements IRCDDBExtApp
 		return d;
 	}
 	
-	public IRCDDBExtApp.UpdateResult dbUpdate(Date d, String k, String v)
+	public IRCDDBExtApp.UpdateResult dbUpdate(Date d, String k, String v, String ircUser)
 	{
 		if (state < 2)
 		{
@@ -477,6 +522,50 @@ public class RptrApp implements IRCDDBExtApp
 				 " and last_mod_time < '" + lastModTime + "'");
 
 				Dbg.println(Dbg.DBG1, "update sync_mng (" + targetCS + "): " + r);
+
+                               if ((r != 1) && insertUsers)
+                               {
+                                 rs = sql.executeQuery("select arearp_cs from "+
+                                         "sync_mng where target_cs='" + targetCS + "'");
+
+                                 if ((rs != null) && !rs.next())
+                                 {
+                                       String tmpUserCS = targetCS.substring(0,7) + " ";
+                                       String dnsSuffix = targetCS.substring(7,8);
+
+                                       if (dnsSuffix.equals(" "))
+                                       {
+                                               dnsSuffix = "";
+                                       }
+                                       else
+                                       {
+                                               dnsSuffix = "-" + dnsSuffix.toLowerCase();
+                                       }
+
+                                       r = sql.executeUpdate( "insert into sync_mng values('" +
+                                         targetCS + "', '" + lastModTime + "', now(), now(), '" +
+                                         tmpUserCS.trim().toLowerCase() + dnsSuffix + "', '" +
+                                         areaCS + "', '" + zoneCS + "', '" +
+                                         tmpUserCS + "', '" + zoneCS + "', '0.0.0.0', false)");
+
+                                         if (r != 1)
+                                         {
+                                          Dbg.println(Dbg.WARN, "DBClient/insert user sync_mng unexpected value "+r);
+                                         }
+                                 }
+                                 else
+                                 {
+                                         Dbg.println(Dbg.WARN, "DBClient/select  rs!=null");
+                                 }
+
+                                 if (rs!=null)
+                                 {
+                                         rs.close();
+                                 }
+
+
+                               } // if insertUsers
+
 			}
 
 			} // if (!doNotUpdate)
@@ -518,7 +607,7 @@ public class RptrApp implements IRCDDBExtApp
 		return null;
 	}
 	
-    	public void setParams (Properties p, Pattern k, Pattern v)
+    	public void setParams (Properties p, Pattern k, Pattern v, net.ircDDB.IRCDDBEntryValidator validator)
 	{
 		jdbcClass = p.getProperty("jdbc_class", "none");
 		jdbcURL = p.getProperty("jdbc_url", "none");
@@ -544,6 +633,16 @@ public class RptrApp implements IRCDDBExtApp
 				Dbg.println(Dbg.INFO, "The table 'unsync_gip' will not be changed.");
 			}
 		}
+
+		insertUsers = false;  // do not insert users
+
+               repeaterCall = p.getProperty("rptr_call", "none").toUpperCase();
+
+               while (repeaterCall.length() < 7)
+               {
+                 repeaterCall = repeaterCall + ' ';
+               }
+
 	}
 
     	public void setTopic (String topic)
@@ -609,6 +708,13 @@ public class RptrApp implements IRCDDBExtApp
 
 		fixTables = false;
 		fixUnsyncGIP = false;
+
+                 areaPattern = Pattern.compile(
+                   "^(([1-9][A-Z])|([A-Z][0-9])|([A-Z][A-Z][0-9]))[0-9A-Z]*[A-Z][ ]*[A-RT-Z]$");
+                 targetPattern = Pattern.compile(
+                   "^(([1-9][A-Z])|([A-Z][0-9])|([A-Z][A-Z][0-9]))[0-9A-Z]*[A-Z][ ]*[ A-RT-Z]$");
+
+
 	}	
 
 	boolean init()
