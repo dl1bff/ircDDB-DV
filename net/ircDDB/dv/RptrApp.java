@@ -528,8 +528,10 @@ public class RptrApp implements IRCDDBExtApp
                                  rs = sql.executeQuery("select arearp_cs from "+
                                          "sync_mng where target_cs='" + targetCS + "'");
 
-                                 if ((rs != null) && !rs.next())
+                                 if (rs != null)
                                  {
+				   if ( !rs.next() ) // if user does not exist
+				   {
                                        String tmpUserCS = targetCS.substring(0,7) + " ";
                                        String dnsSuffix = targetCS.substring(7,8);
 
@@ -552,10 +554,11 @@ public class RptrApp implements IRCDDBExtApp
                                          {
                                           Dbg.println(Dbg.WARN, "DBClient/insert user sync_mng unexpected value "+r);
                                          }
+				   }
                                  }
                                  else
                                  {
-                                         Dbg.println(Dbg.WARN, "DBClient/select  rs!=null");
+                                         Dbg.println(Dbg.WARN, "DBClient/select  rs==null");
                                  }
 
                                  if (rs!=null)
