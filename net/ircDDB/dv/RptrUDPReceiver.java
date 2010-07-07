@@ -53,7 +53,7 @@ public class RptrUDPReceiver implements Runnable
 	DatagramSocket s = new DatagramSocket(12346, InetAddress.getByAddress(localhostAddr));
 	s.setReuseAddress(true);
 
-	for (int count = 0; count < 5; count++)
+	for (int count = 0; count < 10000; count++)
 	{
 	  DatagramPacket p = new DatagramPacket(data, data.length);
 
@@ -87,7 +87,7 @@ public class RptrUDPReceiver implements Runnable
       
       try
       {
-	Thread.sleep(10000);
+	Thread.sleep(1000);
       }
       catch ( InterruptedException e )
       {
