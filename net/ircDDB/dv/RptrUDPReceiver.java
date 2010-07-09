@@ -33,10 +33,12 @@ public class RptrUDPReceiver implements Runnable
 {
 
   RptrStandAloneApp app;
+  int udpPort;
 
-  public RptrUDPReceiver ( RptrStandAloneApp n )
+  public RptrUDPReceiver ( RptrStandAloneApp n, int port )
   {
     app = n;
+    udpPort = port;
   }
 
   public void run()
@@ -50,7 +52,7 @@ public class RptrUDPReceiver implements Runnable
 
       try
       {
-	DatagramSocket s = new DatagramSocket(12346, InetAddress.getByAddress(localhostAddr));
+	DatagramSocket s = new DatagramSocket(udpPort, InetAddress.getByAddress(localhostAddr));
 	s.setReuseAddress(true);
 
 	for (int count = 0; count < 10000; count++)

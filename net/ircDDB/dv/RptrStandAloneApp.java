@@ -36,6 +36,7 @@ import net.ircDDB.Dbg;
 public class RptrStandAloneApp extends RptrApp
 {
 
+  int udpPort;
 	
   public void setParams (Properties p, Pattern k, Pattern v, net.ircDDB.IRCDDBEntryValidator validator)
   {
@@ -48,11 +49,15 @@ public class RptrStandAloneApp extends RptrApp
       Dbg.println(Dbg.ERR, "'version' property not correct - will not insert users");
       insertUsers = false;
     }
+
+    udpPort = Integer.parseInt(p.getProperty("mheard_udp_port", "12346"));
   }	  
 
   public RptrStandAloneApp()
   {
     super();
+
+    udpPort = 12456;
   }	
 
 
@@ -84,7 +89,7 @@ public class RptrStandAloneApp extends RptrApp
 
   public void run()
   {
-    RptrUDPReceiver u = new RptrUDPReceiver(this);
+    RptrUDPReceiver u = new RptrUDPReceiver(this, udpPort);
 
     Thread t = new Thread(u);
 
