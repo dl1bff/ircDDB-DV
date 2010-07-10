@@ -121,7 +121,7 @@ public class CallSignValidator implements net.ircDDB.IRCDDBEntryValidator
       if ( user.substring(0,p).equals("s") ||
 	user.substring(0,p).equals("d")  )
       {
-	Dbg.println(Dbg.DBG1, "allow 'd-' and 's-' user: " + user);
+	Dbg.println(Dbg.DBG2, "allow 'd-' and 's-' user: " + user);
 	return true;
       }
       else
