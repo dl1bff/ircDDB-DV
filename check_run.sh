@@ -50,6 +50,16 @@ fi
 
 if [ "$START_RUNSH" = "yes" ]
 then
+   if [ -s stdout.txt ]
+   then
+      mv stdout.txt stdout-` date '+%Y%m%d%H%M' `.txt
+   fi
+
+   if [ -s stderr.txt ]
+   then
+      mv stderr.txt stderr-` date '+%Y%m%d%H%M' `.txt
+   fi
+
    nohup ./run.sh "(cwd: `pwd`)" >stdout.txt 2>stderr.txt &
 fi
 
