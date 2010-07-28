@@ -26,6 +26,8 @@ LKG=0
 D2=200
 D1=0
 
+echo $$ > run.pid
+
 while :
 do
 
@@ -61,7 +63,7 @@ do
 
  D1=` date '+%s' `
 
- $JAVA $SECURITY -cp $CP net.ircDDB.IRCDDBApp
+ $JAVA $SECURITY -cp $CP net.ircDDB.IRCDDBApp PPID$$
 
  D2=` date '+%s' `
 
