@@ -22,6 +22,9 @@
 
 URL=http://server-group-2-update.example.com/ircDDB
 
+FILE1=ircDDB2.jar
+FILE2=app2.jar
+
 LKG=0
 D2=200
 D1=0
@@ -40,8 +43,8 @@ do
  if [ "$D" -lt 180 ] && [ "$LKG" = 0 ]
  then
         echo "respawning too quickly, going back to old version"
-        cp ircDDB2.jar.lastKnownGood ircDDB2.jar
-        cp app2.jar.lastKnownGood app2.jar
+        cp $FILE1.lastKnownGood $FILE1
+        cp $FILE2.lastKnownGood $FILE2
         sleep 100
         LKG=1
  else
@@ -49,16 +52,16 @@ do
         then
                 # if the software previously ran longer than 180 seconds
                 # keep a copy of the old version
-                cp ircDDB2.jar ircDDB2.jar.lastKnownGood
-                cp app2.jar app2.jar.lastKnownGood
+                cp $FILE1 $FILE1.lastKnownGood
+                cp $FILE2 $FILE2.lastKnownGood
         fi
-        curl -O $URL/ircDDB2.jar
-        curl -O $URL/app2.jar
+        curl -O $URL/$FILE1
+        curl -O $URL/$FILE2
         LKG=0
  fi
 
  SECURITY="-Djava.security.manager -Djava.security.policy=ircDDB.policy"
- CP="app2.jar:ircDDB2.jar:/opt/dstarmon/postgresql-8.4-701.jdbc3.jar"
+ CP="$FILE1:$FILE2:/opt/dstarmon/postgresql-8.4-701.jdbc3.jar"
  JAVA=/opt/products/dstar/j2se/jre/bin/java
 
  D1=` date '+%s' `
