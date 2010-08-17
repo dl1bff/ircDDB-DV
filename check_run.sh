@@ -37,7 +37,7 @@ then
    then
      # run.sh not running, kill old java process
      JAVA_PID=`ps auxwww | grep "PPID${OLD_PID}\$" | awk 'NR==1 { print $2 }' | tr -c -d '[0-9]' `
-     if [ -n "JAVA_PID" ]
+     if [ -n "$JAVA_PID" ]
      then
         kill "$JAVA_PID"
      fi
