@@ -70,28 +70,27 @@ public class DsmApp implements IRCDDBExtApp
   {
   }
 
-  public boolean needsDatabaseUpdate()
+  public boolean needsDatabaseUpdate(int tableID)
   {
 	  return false;
   }
 
-  public Date getLastEntryDate()
+  public Date getLastEntryDate(int tableID)
   {
 	  return null;
   }
 	
-  public IRCDDBExtApp.UpdateResult dbUpdate(Date d, String k, String v, String ircUser)
+  public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser)
   {
 	  return null;
   }
 	
-  public LinkedList<IRCDDBExtApp.DatabaseObject> getDatabaseObjects(Date d, int num)
+  public LinkedList<IRCDDBExtApp.DatabaseObject> getDatabaseObjects(int tableID, Date d, int num)
   {
 	  return null;
   }
 	
-  public void setParams (Properties p, Pattern k, Pattern v,
-     net.ircDDB.IRCDDBEntryValidator validator)
+  public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v )
   {
     jdbcClass = p.getProperty("dsm_jdbc_class", "none");
     jdbcURL = p.getProperty("dsm_jdbc_url", "none");

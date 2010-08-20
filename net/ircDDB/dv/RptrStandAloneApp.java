@@ -38,9 +38,9 @@ public class RptrStandAloneApp extends RptrApp
 
   int udpPort;
 	
-  public void setParams (Properties p, Pattern k, Pattern v, net.ircDDB.IRCDDBEntryValidator validator)
+  public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
   {
-    super.setParams(p, k, v, validator);
+    super.setParams(p, numTables, k, v);
 
     insertUsers = p.getProperty("rptr_insert_users", "no").equals("yes");
 

@@ -213,13 +213,19 @@ public class RptrApp implements IRCDDBExtApp
 		}
 	}
 
-	public boolean needsDatabaseUpdate()
+	public boolean needsDatabaseUpdate(int tableID)
 	{
-		return true;
+		return (tableID == 0);
 	}
 
-	public Date getLastEntryDate()
+	public Date getLastEntryDate(int tableID)
 	{
+
+	  if (tableID != 0)
+	  {
+	    return null;
+	  }
+
 		if (state < 2)
 		{
 			Dbg.println(Dbg.INFO, "wait for db");
@@ -287,8 +293,13 @@ public class RptrApp implements IRCDDBExtApp
 		return d;
 	}
 	
-	public IRCDDBExtApp.UpdateResult dbUpdate(Date d, String k, String v, String ircUser)
+	public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser)
 	{
+	  if (tableID != 0)
+	  {
+	    return null;
+	  }
+
 		if (state < 2)
 		{
 			Dbg.println(Dbg.WARN, "db not ready");
@@ -605,12 +616,12 @@ public class RptrApp implements IRCDDBExtApp
 		return r;
 	}
 	
-	public LinkedList<IRCDDBExtApp.DatabaseObject> getDatabaseObjects(Date d, int num)
+	public LinkedList<IRCDDBExtApp.DatabaseObject> getDatabaseObjects(int tableID, Date d, int num)
 	{
 		return null;
 	}
 	
-    	public void setParams (Properties p, Pattern k, Pattern v, net.ircDDB.IRCDDBEntryValidator validator)
+    	public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
 	{
 		jdbcClass = p.getProperty("jdbc_class", "none");
 		jdbcURL = p.getProperty("jdbc_url", "none");

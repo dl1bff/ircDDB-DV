@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import net.ircDDB.Dbg;
 
 
-public class CallSignValidator implements net.ircDDB.IRCDDBEntryValidator
+public class CallSignValidator
 {
 
 
@@ -81,9 +81,6 @@ public class CallSignValidator implements net.ircDDB.IRCDDBEntryValidator
   }
 
 
-  public void setParams( java.util.Properties p )
-  {
-  }
 
   public boolean isValid (String k, String v, String user)
   {
@@ -118,10 +115,10 @@ public class CallSignValidator implements net.ircDDB.IRCDDBEntryValidator
 
     if (p == 1)
     {
-      if ( user.substring(0,p).equals("s") ||
-	user.substring(0,p).equals("d")  )
+      if ( user.substring(0,p).equals("d") ||
+	  user.substring(0,p).equals("s") )
       {
-	Dbg.println(Dbg.DBG2, "allow 'd-' and 's-' user: " + user);
+	Dbg.println(Dbg.DBG2, "allow 'd-' or 's-' user: " + user);
 	return true;
       }
       else
