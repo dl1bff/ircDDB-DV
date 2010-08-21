@@ -90,12 +90,14 @@ public class DsmApp implements IRCDDBExtApp
 	  return null;
   }
 	
-  public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v )
+  public boolean setParams (Properties p, int numTables, Pattern[] k, Pattern[] v )
   {
     jdbcClass = p.getProperty("dsm_jdbc_class", "none");
     jdbcURL = p.getProperty("dsm_jdbc_url", "none");
     jdbcUsername = p.getProperty("dsm_jdbc_username", "none");
     jdbcPassword = p.getProperty("dsm_jdbc_password", "none");
+
+    return true;
   }
 
   public void setTopic (String topic)

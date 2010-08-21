@@ -38,9 +38,14 @@ public class RptrStandAloneApp extends RptrApp
 
   int udpPort;
 	
-  public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
+  public boolean setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
   {
-    super.setParams(p, numTables, k, v);
+    boolean success = super.setParams(p, numTables, k, v);
+
+    if (!success)
+    {
+      return false;
+    }
 
     insertUsers = p.getProperty("rptr_insert_users", "no").equals("yes");
 
@@ -51,6 +56,8 @@ public class RptrStandAloneApp extends RptrApp
     }
 
     udpPort = Integer.parseInt(p.getProperty("mheard_udp_port", "12346"));
+
+    return true;
   }	  
 
   public RptrStandAloneApp()

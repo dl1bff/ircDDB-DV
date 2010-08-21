@@ -621,7 +621,7 @@ public class RptrApp implements IRCDDBExtApp
 		return null;
 	}
 	
-    	public void setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
+    	public boolean setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
 	{
 		jdbcClass = p.getProperty("jdbc_class", "none");
 		jdbcURL = p.getProperty("jdbc_url", "none");
@@ -650,13 +650,20 @@ public class RptrApp implements IRCDDBExtApp
 
 		insertUsers = false;  // do not insert users
 
-               repeaterCall = p.getProperty("rptr_call", "none").toUpperCase();
+          repeaterCall = p.getProperty("rptr_call", "none").toUpperCase();
 
-               while (repeaterCall.length() < 7)
-               {
-                 repeaterCall = repeaterCall + ' ';
-               }
+          while (repeaterCall.length() < 7)
+          {
+            repeaterCall = repeaterCall + ' ';
+          }
 
+	  if (repeaterCall.length() != 7)
+	  {
+	    Dbg.println(Dbg.ERR, "rptr_call has invalid length (" + repeaterCall + ")");
+	    return false;
+	  }
+
+	  return true;
 	}
 
     	public void setTopic (String topic)

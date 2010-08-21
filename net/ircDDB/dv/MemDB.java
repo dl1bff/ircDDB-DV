@@ -97,7 +97,7 @@ public class MemDB implements IRCDDBExtApp
 	  updateChannel = null;
 	}
 		
-	public void setParams( Properties p, int numTables, Pattern[] keyPattern, Pattern[] valuePattern)
+	public boolean setParams( Properties p, int numTables, Pattern[] keyPattern, Pattern[] valuePattern)
 	{
 	  numberOfTables = numTables;
 
@@ -118,7 +118,7 @@ public class MemDB implements IRCDDBExtApp
 	    bootFile[i] = p.getProperty("memdb_bootfile" + i, "db" + i + ".txt");
 	  }
 
-	  for (i=0; i < numberOfTables; i++)
+	  for (i=(numberOfTables - 1); i >= 0; i--)
 	  {
 	    try
 	    {
@@ -156,6 +156,7 @@ public class MemDB implements IRCDDBExtApp
 	    }
 	  }
 	
+	  return true;
 	}
 
 	public boolean needsDatabaseUpdate(int tableID)
