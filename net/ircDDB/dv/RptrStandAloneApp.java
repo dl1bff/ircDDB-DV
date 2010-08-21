@@ -47,9 +47,11 @@ public class RptrStandAloneApp extends RptrApp
       return false;
     }
 
-    insertUsers = p.getProperty("rptr_insert_users", "no").equals("yes");
+    insertUsers = p.getProperty("rptr_insert_users", "no").trim().equals("yes");
 
-    if ( !p.getProperty("version", "multihomed").equals("standalone") )
+    Dbg.println(Dbg.DBG1, "property 'rptr_insert_users': " + insertUsers);
+
+    if ( !p.getProperty("version", "multihomed").trim().equals("standalone") )
     {
       Dbg.println(Dbg.ERR, "'version' property not correct - will not insert users");
       insertUsers = false;

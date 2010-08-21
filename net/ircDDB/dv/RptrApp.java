@@ -127,7 +127,7 @@ public class RptrApp implements IRCDDBExtApp
 
 		int i = nick.indexOf('-');
 
-		if ((i > 3) && (i < 7)) // callsign with at 4,5 or 6 characters
+		if ((i > 3) && (i < 7)) // callsign with  4,5 or 6 characters
 		{
 			String callsign = nick.substring(0,i).toUpperCase();
 			
@@ -190,7 +190,7 @@ public class RptrApp implements IRCDDBExtApp
 				}
 				else
 				{
-					Dbg.println(Dbg.WARN, "DBClient/select zonerp_cs unexpected entry or rs==null");
+					Dbg.println(Dbg.WARN, "DBClient/select2 zonerp_cs unexpected entry or rs==null");
 				}
 
 				if (rs!=null)
@@ -215,13 +215,22 @@ public class RptrApp implements IRCDDBExtApp
 
 	public boolean needsDatabaseUpdate(int tableID)
 	{
-		return (tableID == 0);
+		return true;
 	}
 
 	public Date getLastEntryDate(int tableID)
 	{
+	  String dbTableName;
 
-	  if (tableID != 0)
+	  if (tableID == 0)
+	  {
+	    dbTableName = "sync_mng_external";
+	  }
+	  else if (tableID == 1)
+	  {
+	    dbTableName = "ircddb_zonerp";
+	  }
+	  else
 	  {
 	    return null;
 	  }
@@ -251,7 +260,8 @@ public class RptrApp implements IRCDDBExtApp
 		try
 		{
 			rs = sql.executeQuery(
-				"select last_mod_time at time zone 'UTC' from sync_mng_external order by last_mod_time desc");
+				"select last_mod_time at time zone 'UTC' from " +
+				  dbTableName + " order by last_mod_time desc");
 
 		}
 		catch (SQLException e)
@@ -292,10 +302,132 @@ public class RptrApp implements IRCDDBExtApp
 
 		return d;
 	}
+
+
+	IRCDDBExtApp.UpdateResult dbUpdate1(int tableID, Date d, String k, String v, String ircUser)
+	{
+	  if (state < 2)
+	  {
+	    Dbg.println(Dbg.WARN, "db not ready");
+	    return null;
+	  }
+		
+	  ResultSet rs;
+
+	  String areaCS = k.replace('_', ' ');
+	  String zoneCS = v.replace('_', ' ');
+
+	  String lastModTime = dbDateFormat.format(d);
+
+	  Date oldLastModTime = new Date(950000000000L);  // February 2000
 	
+	  boolean insertNewEntry = false;
+	  String oldZoneCS = "NONE";
+
+	  try
+	  {
+	    boolean doNotUpdate = false;
+
+	    rs = sql.executeQuery(
+		    "select last_mod_time at time zone 'UTC', arearp_cs from " +
+		      "ircddb_zonerp where arearp_cs ='" + areaCS + "'");
+
+	    if (rs == null)
+	    {
+		    Dbg.println(Dbg.WARN, "DBClient1/ResultSet=null " );
+		    state = 1;
+		    return null;
+	    }
+
+	    if (rs.next())
+	    {
+		    oldLastModTime = new Date( rs.getTimestamp(1).getTime());
+		    oldZoneCS = rs.getString(2);
+
+		    insertNewEntry = false;
+
+		    if (oldLastModTime.getTime() > d.getTime())
+		    {
+			    doNotUpdate = true;
+		    }
+	    }
+	    else
+	    {
+		    insertNewEntry = true;
+	    }
+	    
+	    rs.close();
+
+	    Date nowDate = new Date();
+
+	    if (d.getTime() > (nowDate.getTime() + 300000))
+	    {
+		    doNotUpdate = true;
+	    }
+
+
+	    if (insertNewEntry)
+	    {
+	      int r = sql.executeUpdate (
+		"insert into ircddb_zonerp values('" + areaCS +
+		  "', '" + lastModTime + "', '" + zoneCS + "')" );
+	      if (r != 1)
+	      {
+		Dbg.println(Dbg.WARN, "DBClient1/insert unexpected value " + r);
+	      }
+	    }
+	    else
+	    {
+	      int r = sql.executeUpdate (
+		"update ircddb_zonerp set last_mod_time='" + lastModTime +
+		     "', zonerp_cs='" + zoneCS +
+		     "' where arearp_cs='" + areaCS + "'");
+
+	      if (r != 1)
+	      {
+		Dbg.println(Dbg.WARN, "DBClient1/update1 unexpected value " + r);
+	      }
+	    }
+	  }
+	  catch (SQLException e)
+	  {
+	    Dbg.println(Dbg.WARN, "DBClient1/executeQuery: " + e);
+	    state = 1;
+	    return null;
+	  }
+
+	  IRCDDBExtApp.UpdateResult r = new IRCDDBExtApp.UpdateResult();
+	  IRCDDBExtApp.DatabaseObject n = new IRCDDBExtApp.DatabaseObject();
+	  IRCDDBExtApp.DatabaseObject o = new IRCDDBExtApp.DatabaseObject();
+
+	  r.keyWasNew = insertNewEntry;
+	  r.newObj = n;
+	  r.oldObj = o;
+
+	  n.modTime = d;
+	  n.key = k;
+	  n.value = v;
+
+	  while (oldZoneCS.length() < 8)
+	  {
+		  oldZoneCS = oldZoneCS + " ";
+	  }
+
+	  o.modTime = oldLastModTime;
+	  o.key = k;
+	  o.value = oldZoneCS.replace(' ', '_');
+	  
+	  return r;
+	}
+
+
 	public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser)
 	{
-	  if (tableID != 0)
+	  if (tableID == 1)
+	  {
+	    return dbUpdate1( tableID, d, k, v, ircUser );
+	  }
+	  else if (tableID != 0)
 	  {
 	    return null;
 	  }
@@ -367,8 +499,8 @@ public class RptrApp implements IRCDDBExtApp
 			boolean targetIsAreaRP = false;
 
 			rs = sql.executeQuery(
-				"select zonerp_cs from sync_mng " +
-				"where arearp_cs='" + targetCS + "' and del_flg=false limit 1"
+				"select zonerp_cs from ircddb_zonerp " +
+				"where arearp_cs='" + targetCS + "'"
 				);
 
 			if (rs == null)
@@ -390,13 +522,13 @@ public class RptrApp implements IRCDDBExtApp
 			if (! targetIsAreaRP) // do the next steps only if targetCS is not an arearp_cs
 			{
 			rs = sql.executeQuery(
-				"select zonerp_cs from sync_mng " +
-				"where arearp_cs='" + areaCS + "' and del_flg=false limit 1"
+				"select zonerp_cs from ircddb_zonerp " +
+				"where arearp_cs='" + areaCS + "'"
 				);
 
 			if (rs == null)
 			{
-				Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
+				Dbg.println(Dbg.WARN, "DBClient/ResultSet=null (2)" );
 				state = 1;
 				return null;
 			}
@@ -406,90 +538,62 @@ public class RptrApp implements IRCDDBExtApp
 			{
 				// System.out.println("zonerp = (" + rs.getString(1) + ")");
 				zoneCS = rs.getString(1);
-				rs.close();
 			}
-			else 
+
+			rs.close();
+
+
+			if ( !zoneCS.equals("NOCALL99") &&
+			    (areaCS.charAt(6) == ' ') &&
+			    ("ABC".indexOf (areaCS.charAt(7)) >= 0) &&
+			      fixTables)
 			{
-				rs.close();
+			  rs = sql.executeQuery("select target_cs from sync_mng " +
+				  "where target_cs = '" + areaCS + "'");
 
-				if ((areaCS.charAt(6) == ' ') &&
-					("ABC".indexOf (areaCS.charAt(7)) >= 0) &&
-					  fixTables)
-				{
-					rs = sql.executeQuery("select target_cs from sync_mng " +
-						"where target_cs = '" + areaCS + "'");
-
-					if (rs == null)
-					{
-						Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
-						state = 1;
-						return null;
-					}
+			  if (rs == null)
+			  {
+			    Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
+			    state = 1;
+			    return null;
+			  }
 	
-					if (rs.next())
-					{
-						Dbg.println(Dbg.WARN, "DBClient/select target_cs unexpected entry");
-					}
-					else
-					{
-						rs.close();
+			  if (!rs.next()) // module does not exist in sync_mng
+			  {
+			    rs.close();
 
-						String tmpZoneCS = areaCS.substring(0,6) + "  ";
+			    rs = sql.executeQuery(
+				    "select zonerp_cs from sync_gip " +
+				    "where zonerp_cs='" + zoneCS + "'");
 
-                                                rs = sql.executeQuery(
-                                                        "select zonerp_cs from sync_gip " +
-                                                        "where zonerp_cs='" + tmpZoneCS + "'");
-
-                                                if (rs == null)
-                                                {
-                                                        Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
-                                                        state = 1;
-                                                        return null;
-                                                }
+			    if (rs == null)
+			    {
+			      Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
+			      state = 1;
+			      return null;
+			    }
 
 
-                                                if (rs.next()) // exists in sync_gip
-                                                {
+			    if (rs.next()) // exists in sync_gip
+			    {
 
-							int r = sql.executeUpdate( "insert into sync_mng values('" +
-								areaCS + "', '" + lastModTime + "', now(), now(), '" +
-								  tmpZoneCS.trim().toLowerCase() + "-module-" +
-								  areaCS.substring(7,8).toLowerCase() + "', '" +
-								  areaCS + "', '" + tmpZoneCS + "', '" +
-								  tmpZoneCS + "', '" + tmpZoneCS + "', '0.0.0.0', false)");
-							if (r != 1)
-							{
-							 Dbg.println(Dbg.WARN, "DBClient/insert2 unexpected value " + r);
-							}
+			      int r = sql.executeUpdate( "insert into sync_mng values('" +
+				areaCS + "', '" + lastModTime + "', now(), now(), '" +
+				  zoneCS.trim().toLowerCase() + "-module-" +
+				  areaCS.substring(7,8).toLowerCase() + "', '" +
+				  areaCS + "', '" + zoneCS + "', '" +
+				  zoneCS + "', '" + zoneCS + "', '0.0.0.0', false)");
 
-							rs.close();
+			      if (r != 1)
+			      {
+			        Dbg.println(Dbg.WARN, "DBClient/insert2 unexpected value " + r);
+			      }
 
-							rs = sql.executeQuery(
-								"select zonerp_cs from sync_mng " +
-								"where arearp_cs='" + areaCS + "' and del_flg=false limit 1"
-								);
+			    }
 
-							if (rs == null)
-							{
-								Dbg.println(Dbg.WARN, "DBClient/ResultSet=null " );
-								state = 1;
-								return null;
-							}
+			  }
 
-
-							if (rs.next())
-							{
-								// System.out.println("zonerp = (" + rs.getString(1) + ")");
-								zoneCS = rs.getString(1);
-							}
-                                                }
-
-					}
-
-					rs.close();
-				}
-				
-
+			  rs.close();
 			}
 
 			} // if (! targetIsAreaRP)
@@ -536,6 +640,8 @@ public class RptrApp implements IRCDDBExtApp
 
                                if ((r != 1) && insertUsers)
                                {
+				 Dbg.println(Dbg.DBG1, "insert user");
+
                                  rs = sql.executeQuery("select arearp_cs from "+
                                          "sync_mng where target_cs='" + targetCS + "'");
 
@@ -543,8 +649,11 @@ public class RptrApp implements IRCDDBExtApp
                                  {
 				   if ( !rs.next() ) // if user does not exist
 				   {
+
                                        String tmpUserCS = targetCS.substring(0,7) + " ";
                                        String dnsSuffix = targetCS.substring(7,8);
+
+				      Dbg.println(Dbg.DBG1, "insert user " + tmpUserCS);
 
                                        if (dnsSuffix.equals(" "))
                                        {
@@ -623,32 +732,33 @@ public class RptrApp implements IRCDDBExtApp
 	
     	public boolean setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
 	{
-		jdbcClass = p.getProperty("jdbc_class", "none");
-		jdbcURL = p.getProperty("jdbc_url", "none");
-		jdbcUsername = p.getProperty("jdbc_username", "none");
-		jdbcPassword = p.getProperty("jdbc_password", "none");
+	  jdbcClass = p.getProperty("jdbc_class", "none");
+	  jdbcURL = p.getProperty("jdbc_url", "none");
+	  jdbcUsername = p.getProperty("jdbc_username", "none");
+	  jdbcPassword = p.getProperty("jdbc_password", "none");
 
+	  RptrAppDBCheck chk = new RptrAppDBCheck( jdbcClass, jdbcURL, jdbcUsername, jdbcPassword );
 
-		fixTables = p.getProperty("rptr_fix_tables", "no").equals("yes");
-		fixUnsyncGIP = p.getProperty("rptr_fix_unsync_gip", "yes").equals("yes");
+	  fixTables = p.getProperty("rptr_fix_tables", "no").equals("yes");
+	  fixUnsyncGIP = p.getProperty("rptr_fix_unsync_gip", "yes").equals("yes");
 
-		if (fixTables)
-		{
-			Dbg.println(Dbg.INFO, "Missing repeater entries in 'sync_mng' and 'sync_gip' "+
-				"will be created automatically.");
+	  if (fixTables)
+	  {
+	    Dbg.println(Dbg.INFO, "Missing repeater entries in 'sync_mng' and 'sync_gip' "+
+		    "will be created automatically.");
 
-			if (fixUnsyncGIP)
-			{
-			 Dbg.println(Dbg.INFO, "Missing repeater entries in 'unsync_gip' "+
-					"will be created automatically.");
-			}	
-			else
-			{
-				Dbg.println(Dbg.INFO, "The table 'unsync_gip' will not be changed.");
-			}
-		}
+	    if (fixUnsyncGIP)
+	    {
+	     Dbg.println(Dbg.INFO, "Missing repeater entries in 'unsync_gip' "+
+			    "will be created automatically.");
+	    }	
+	    else
+	    {
+		    Dbg.println(Dbg.INFO, "The table 'unsync_gip' will not be changed.");
+	    }
+	  }
 
-		insertUsers = false;  // do not insert users
+	  insertUsers = false;  // do not insert users
 
           repeaterCall = p.getProperty("rptr_call", "none").toUpperCase();
 
@@ -663,7 +773,14 @@ public class RptrApp implements IRCDDBExtApp
 	    return false;
 	  }
 
-	  return true;
+	  if (fixUnsyncGIP)
+	  {
+	    String[] t = { "unsync_gip" };
+
+	    return chk.fixit(t);
+	  }
+
+	  return chk.fixit(null);  // run DBCheck and create tables when necessary
 	}
 
     	public void setTopic (String topic)
