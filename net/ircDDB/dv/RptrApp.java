@@ -546,7 +546,8 @@ public class RptrApp implements IRCDDBExtApp
 			if ( !zoneCS.equals("NOCALL99") &&
 			    (areaCS.charAt(6) == ' ') &&
 			    ("ABC".indexOf (areaCS.charAt(7)) >= 0) &&
-			      fixTables)
+			      fixTables &&
+			      !zoneCS.trim().equals(repeaterCall.trim()))
 			{
 			  rs = sql.executeQuery("select target_cs from sync_mng " +
 				  "where target_cs = '" + areaCS + "'");
