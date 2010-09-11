@@ -761,7 +761,7 @@ public class RptrApp implements IRCDDBExtApp
 
 	  insertUsers = false;  // do not insert users
 
-          repeaterCall = p.getProperty("rptr_call", "none").toUpperCase();
+          repeaterCall = p.getProperty("rptr_call", "none").trim().toUpperCase();
 
           while (repeaterCall.length() < 7)
           {
