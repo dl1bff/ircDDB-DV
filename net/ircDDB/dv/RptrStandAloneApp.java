@@ -70,7 +70,7 @@ public class RptrStandAloneApp extends RptrApp
   }	
 
 
-  void mheardCall(String targetCS, char repeaterModule)
+  void mheardCall(String targetCS, char repeaterModule, String headerInfo)
   {
     String areaCS = repeaterCall + repeaterModule;
 
@@ -85,6 +85,11 @@ public class RptrStandAloneApp extends RptrApp
       m.params[0] = currentServerNick;
       m.params[1] = "UPDATE " + dbDateFormat.format(new Date())
 	 + " " + targetCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_');
+
+      if (headerInfo != null)
+      {
+	m.params[1] = m.params[1] + " " + headerInfo;
+      }
 
       IRCMessageQueue q = getSendQ();
 

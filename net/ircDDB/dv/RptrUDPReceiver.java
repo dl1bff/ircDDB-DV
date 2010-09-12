@@ -44,7 +44,7 @@ public class RptrUDPReceiver implements Runnable
   public void run()
   {
     byte localhostAddr[] = { 127, 0, 0, 1 };
-    byte data[] = new byte[20];
+    byte data[] = new byte[80];
 
     while(true)
     {
@@ -61,18 +61,54 @@ public class RptrUDPReceiver implements Runnable
 
 	  s.receive(p);
 
-	  // System.out.println(p.getLength() + " " + p.getOffset());
+	  // System.out.println("len + offset: " + p.getLength() + " " + p.getOffset());
 
-	  if ((p.getLength() == 11) && (p.getOffset() == 0) &&
-	    (data[8] == 0) && (data[10] == 0) && ("ABC".indexOf(data[9]) >= 0))
+	  switch (p.getLength())
 	  {
-	    String cs = new String(data, 0, 8);
-	    // System.out.println("(" + cs + ")");
+	  case 11:
 
-	    if (app != null)
+	    if ((p.getOffset() == 0) &&
+	      (data[8] == 0) && (data[10] == 0) && ("ABC".indexOf(data[9]) >= 0))
 	    {
-	      app.mheardCall(cs, (char) data[9]);
+	      String cs = new String(data, 0, 8);
+	      // System.out.println("(" + cs + ")");
+
+	      if (app != null)
+	      {
+		app.mheardCall(cs, (char) data[9], null);
+	      }
 	    }
+	    break;
+
+	  case 39:
+	    if ((p.getOffset() == 0) &&
+	      ("ABC".indexOf(data[18]) >= 0))
+	    {
+	      String myCall = new String(data, 27, 8);
+	      String myExt = new String(data, 35, 4);
+	      String yourCall = new String(data, 19, 8);
+	      String rpt1 = new String(data, 11, 8);
+	      String rpt2 = new String(data, 3, 8);
+
+	     //  System.out.println("rpt1 (" + rpt1 + ")");
+
+	      String headerInfo = String.format("%1$02x %2$02x %3$02x %4$s %5$s %6$s %7$s %8$s",
+		  data[0], data[1], data[2],
+		  rpt2.replace(' ', '_'),
+		  rpt1.replace(' ', '_'),
+		  yourCall.replace(' ', '_'),
+		  myCall.replace(' ', '_'),
+		  myExt.replace(' ', '_'));
+
+
+	      if (app != null)
+	      {
+		app.mheardCall(myCall, (char) data[18], headerInfo);
+	      }
+	      
+	    }
+	    break;
+	    
 	  }
 
 	}
