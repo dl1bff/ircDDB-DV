@@ -75,7 +75,7 @@ public class RptrUDPReceiver implements Runnable
 
 	      if (app != null)
 	      {
-		app.mheardCall(cs, (char) data[9], null);
+		app.mheardCall(cs.replaceAll("[^A-Z0-9_ ]", ""), (char) data[9], null);
 	      }
 	    }
 	    break;
@@ -87,23 +87,21 @@ public class RptrUDPReceiver implements Runnable
 	      String myCall = new String(data, 27, 8);
 	      String myExt = new String(data, 35, 4);
 	      String yourCall = new String(data, 19, 8);
-	      String rpt1 = new String(data, 11, 8);
 	      String rpt2 = new String(data, 3, 8);
 
 	     //  System.out.println("rpt1 (" + rpt1 + ")");
 
-	      String headerInfo = String.format("%1$02x %2$02x %3$02x %4$s %5$s %6$s %7$s %8$s",
-		  data[0], data[1], data[2],
+	      String headerInfo = String.format("%1$s %2$s %3$02X %4$02X %5$02X %6$s",
 		  rpt2.replace(' ', '_'),
-		  rpt1.replace(' ', '_'),
 		  yourCall.replace(' ', '_'),
-		  myCall.replace(' ', '_'),
+		  data[0], data[1], data[2],
 		  myExt.replace(' ', '_'));
 
 
 	      if (app != null)
 	      {
-		app.mheardCall(myCall, (char) data[18], headerInfo);
+		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""),
+		    (char) data[18], headerInfo.replaceAll("[^A-Z0-9_ ]", "_"));
 	      }
 	      
 	    }
