@@ -101,7 +101,7 @@ public class RptrUDPReceiver implements Runnable
 	      if (app != null)
 	      {
 		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""),
-		    (char) data[18], headerInfo.replaceAll("[^A-Z0-9_ ]", "_"));
+		    (char) data[18], headerInfo.replaceAll("[^A-Z0-9/_ ]", "_"));
 	      }
 	      
 	    }
