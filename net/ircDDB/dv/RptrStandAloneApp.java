@@ -36,8 +36,6 @@ import net.ircDDB.Dbg;
 public class RptrStandAloneApp extends RptrApp
 {
 
-  int udpPort;
-	
   public boolean setParams (Properties p, int numTables, Pattern[] k, Pattern[] v)
   {
     boolean success = super.setParams(p, numTables, k, v);
@@ -61,56 +59,6 @@ public class RptrStandAloneApp extends RptrApp
 
     return true;
   }	  
-
-  public RptrStandAloneApp()
-  {
-    super();
-
-    udpPort = 12456;
-  }	
-
-
-  void mheardCall(String targetCS, char repeaterModule, String headerInfo)
-  {
-    String areaCS = repeaterCall + repeaterModule;
-
-    if ( !targetCS.substring(0,7).equals(areaCS.substring(0,7)) &&
-       isValidCallSign(targetCS, targetPattern, 3, 7) &&
-       isValidCallSign(areaCS, areaPattern, 4, 6) &&
-	 (currentServerNick != null))
-    {
-      IRCMessage m = new IRCMessage();
-      m.command = "PRIVMSG";
-      m.numParams = 2;
-      m.params[0] = currentServerNick;
-      m.params[1] = "UPDATE " + dbDateFormat.format(new Date())
-	 + " " + targetCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_');
-
-      if (headerInfo != null)
-      {
-	m.params[1] = m.params[1] + " " + headerInfo;
-      }
-
-      IRCMessageQueue q = getSendQ();
-
-      if (q != null)
-      {
-        q.putMessage(m);
-      }
-    }
-
-  }
-
-  public void run()
-  {
-    RptrUDPReceiver u = new RptrUDPReceiver(this, udpPort);
-
-    Thread t = new Thread(u);
-
-    t.start();
-
-    super.run();
-  }
 
 }
 

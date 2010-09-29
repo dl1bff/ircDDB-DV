@@ -32,10 +32,10 @@ import net.ircDDB.Dbg;
 public class RptrUDPReceiver implements Runnable
 {
 
-  RptrStandAloneApp app;
+  RptrApp app;
   int udpPort;
 
-  public RptrUDPReceiver ( RptrStandAloneApp n, int port )
+  public RptrUDPReceiver ( RptrApp n, int port )
   {
     app = n;
     udpPort = port;

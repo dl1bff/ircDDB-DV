@@ -77,6 +77,7 @@ public class RptrApp implements IRCDDBExtApp
 
        String repeaterCall;
 
+	int udpPort;
 
          boolean isValidCallSign(String s, Pattern p, int min_len, int max_len)
          {
@@ -759,6 +760,8 @@ public class RptrApp implements IRCDDBExtApp
 	    }
 	  }
 
+	  udpPort = Integer.parseInt(p.getProperty("mheard_udp_port", "0"));
+
 	  insertUsers = false;  // do not insert users
 
           repeaterCall = p.getProperty("rptr_call", "none").trim().toUpperCase();
@@ -854,6 +857,7 @@ public class RptrApp implements IRCDDBExtApp
                    "^(([1-9][A-Z])|([A-Z][0-9])|([A-Z][A-Z][0-9]))[0-9A-Z]*[A-Z][ ]*[ A-RT-Z]$");
 
 
+		udpPort = 0;
 	}	
 
 	boolean init()
@@ -925,9 +929,50 @@ public class RptrApp implements IRCDDBExtApp
 		sql = null;
 	}
 
+
+  void mheardCall(String targetCS, char repeaterModule, String headerInfo)
+  {
+    String areaCS = repeaterCall + repeaterModule;
+
+    if ( !targetCS.substring(0,7).equals(areaCS.substring(0,7)) &&
+       isValidCallSign(targetCS, targetPattern, 3, 7) &&
+       isValidCallSign(areaCS, areaPattern, 4, 6) &&
+         (currentServerNick != null))
+    {
+      IRCMessage m = new IRCMessage();
+      m.command = "PRIVMSG";
+      m.numParams = 2;
+      m.params[0] = currentServerNick;
+      m.params[1] = "UPDATE " + dbDateFormat.format(new Date())
+         + " " + targetCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_');
+
+      if (headerInfo != null)
+      {
+        m.params[1] = m.params[1] + " " + headerInfo;
+      }
+
+      IRCMessageQueue q = getSendQ();
+
+      if (q != null)
+      {
+        q.putMessage(m);
+      }
+    }
+
+  }
+
 	public void run()
 	{
 		int timer = 0;
+
+		if (udpPort > 0)
+		{
+		  RptrUDPReceiver u = new RptrUDPReceiver(this, udpPort);
+
+		  Thread t = new Thread(u);
+
+		  t.start();
+		}
 
 
 		while(true)
