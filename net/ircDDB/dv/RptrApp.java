@@ -71,6 +71,7 @@ public class RptrApp implements IRCDDBExtApp
 	boolean fixUnsyncGIP;
 
        boolean insertUsers;
+	boolean fixUnsyncMNG;
 
        Pattern areaPattern;
        Pattern targetPattern;
@@ -676,6 +677,26 @@ public class RptrApp implements IRCDDBExtApp
                                          {
                                           Dbg.println(Dbg.WARN, "DBClient/insert user sync_mng unexpected value "+r);
                                          }
+
+				      if (fixUnsyncMNG)
+				      {
+					rs = sql.executeQuery("select target_cs from "+
+					   "unsync_mng where target_cs='" + targetCS + "'");
+
+					if (rs != null)
+					{
+					  if ( !rs.next() ) // if user does not exist in unsync_mng
+					  {
+					    r =  sql.executeUpdate( "insert into unsync_mng values('" +
+					       targetCS + "', now(),  now(), now(), false)");
+
+					   if (r != 1)
+					   {
+					    Dbg.println(Dbg.WARN, "DBClient/insert user unsync_mng unexpected value "+r);
+					   }
+					  }
+					}
+				      }
 				   }
                                  }
                                  else
@@ -763,6 +784,7 @@ public class RptrApp implements IRCDDBExtApp
 	  udpPort = Integer.parseInt(p.getProperty("mheard_udp_port", "0"));
 
 	  insertUsers = false;  // do not insert users
+	  fixUnsyncMNG = false;
 
           repeaterCall = p.getProperty("rptr_call", "none").trim().toUpperCase();
 

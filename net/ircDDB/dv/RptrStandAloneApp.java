@@ -46,6 +46,7 @@ public class RptrStandAloneApp extends RptrApp
     }
 
     insertUsers = p.getProperty("rptr_insert_users", "no").trim().equals("yes");
+    fixUnsyncMNG = p.getProperty("rptr_fix_unsync_mng", "no").trim().equals("yes");
 
     Dbg.println(Dbg.DBG1, "property 'rptr_insert_users': " + insertUsers);
 
