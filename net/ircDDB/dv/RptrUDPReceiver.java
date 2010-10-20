@@ -81,6 +81,8 @@ public class RptrUDPReceiver implements Runnable
 	    break;
 
 	  case 39:
+	  case 59:
+
 	    if ((p.getOffset() == 0) &&
 	      ("ABC".indexOf(data[18]) >= 0))
 	    {
@@ -97,11 +99,37 @@ public class RptrUDPReceiver implements Runnable
 		  data[0], data[1], data[2],
 		  myExt.replace(' ', '_'));
 
+	      if (p.getLength() == 59)
+	      {
+		StringBuffer msg = new StringBuffer();
+
+		for (int i = 39; i < 59; i++)
+		{
+		  int d = data[i] & 0x7F;
+
+		  if ((d > 32) && (d < 127))
+		  {
+		    msg.append( (char) d );
+		  }
+		  else
+		  {
+		    msg.append( "_" );
+		  }
+		}
+
+		headerInfo = headerInfo + " " + msg.toString();
+	      }
 
 	      if (app != null)
 	      {
-		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""),
-		    (char) data[18], headerInfo.replaceAll("[^A-Z0-9/_ ]", "_"));
+		String info =  headerInfo.replaceAll("[^A-Z0-9/_ ]", "_");
+
+		if ((data[0] == 0xFF) && (data[1] == 0xFF) && (data[2] == 0xFF))
+		{
+		  info = null;
+		}
+
+		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""), (char) data[18], info);
 	      }
 	      
 	    }

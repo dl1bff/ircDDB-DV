@@ -80,6 +80,10 @@ public class RptrApp implements IRCDDBExtApp
 
 	int udpPort;
 
+	String lastMheardData;
+	Date lastMheardTime;
+
+
          boolean isValidCallSign(String s, Pattern p, int min_len, int max_len)
          {
 
@@ -880,6 +884,10 @@ public class RptrApp implements IRCDDBExtApp
 
 
 		udpPort = 0;
+
+		lastMheardData = "";
+		lastMheardTime = new Date();
+
 	}	
 
 	boolean init()
@@ -961,23 +969,43 @@ public class RptrApp implements IRCDDBExtApp
        isValidCallSign(areaCS, areaPattern, 4, 6) &&
          (currentServerNick != null))
     {
+      Date mheardTime = new Date();
       IRCMessage m = new IRCMessage();
       m.command = "PRIVMSG";
       m.numParams = 2;
       m.params[0] = currentServerNick;
-      m.params[1] = "UPDATE " + dbDateFormat.format(new Date())
+      m.params[1] = "UPDATE " + dbDateFormat.format(mheardTime)
          + " " + targetCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_');
+
+      String mheardData = targetCS + areaCS;
 
       if (headerInfo != null)
       {
         m.params[1] = m.params[1] + " " + headerInfo;
+	mheardData = mheardData + headerInfo;
       }
 
-      IRCMessageQueue q = getSendQ();
+      boolean sendPacket = true;
 
-      if (q != null)
+      if (mheardData.equals(lastMheardData))
       {
-        q.putMessage(m);
+	if (mheardTime.getTime() < (lastMheardTime.getTime() + 4000L))
+	{
+	  sendPacket = false;  // send same packet max. once in 4 seconds
+	}
+      }
+
+      if (sendPacket)
+      {
+	IRCMessageQueue q = getSendQ();
+
+	if (q != null)
+	{
+	  q.putMessage(m);
+	}
+
+	lastMheardData = mheardData;
+	lastMheardTime = mheardTime;
       }
     }
 
