@@ -99,6 +99,8 @@ public class RptrUDPReceiver implements Runnable
 		  data[0], data[1], data[2],
 		  myExt.replace(' ', '_'));
 
+	      String info =  headerInfo.replaceAll("[^A-Z0-9/_ ]", "_");
+
 	      if (p.getLength() == 59)
 	      {
 		StringBuffer msg = new StringBuffer();
@@ -117,14 +119,15 @@ public class RptrUDPReceiver implements Runnable
 		  }
 		}
 
-		headerInfo = headerInfo + " " + msg.toString();
+		info = info + " " + msg.toString();
 	      }
 
 	      if (app != null)
 	      {
-		String info =  headerInfo.replaceAll("[^A-Z0-9/_ ]", "_");
 
-		if ((data[0] == 0xFF) && (data[1] == 0xFF) && (data[2] == 0xFF))
+		if (
+		    ((data[0] == (byte) 0xFF) && (data[1] == (byte) 0xFF) && (data[2] == (byte) 0xFF))
+		    )
 		{
 		  info = null;
 		}

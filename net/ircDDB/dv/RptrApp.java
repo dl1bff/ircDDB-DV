@@ -995,6 +995,9 @@ public class RptrApp implements IRCDDBExtApp
 	}
       }
 
+      lastMheardData = mheardData;
+      lastMheardTime = mheardTime;
+
       if (sendPacket)
       {
 	IRCMessageQueue q = getSendQ();
@@ -1004,8 +1007,6 @@ public class RptrApp implements IRCDDBExtApp
 	  q.putMessage(m);
 	}
 
-	lastMheardData = mheardData;
-	lastMheardTime = mheardTime;
       }
     }
 
