@@ -528,6 +528,7 @@ public class MemDB implements IRCDDBExtApp
 	
 	public void run()
 	{
+	  Date startDate = new Date();
 		
 		while (true)
 		{
@@ -542,6 +543,7 @@ public class MemDB implements IRCDDBExtApp
 			}
 
 			
+			String dbString = "";
 
 			try
 			{
@@ -551,20 +553,44 @@ public class MemDB implements IRCDDBExtApp
 			    PrintWriter p = new PrintWriter(new FileOutputStream(bootFile[i]));
 
 			    LinkedList<DbObject> l = getSortedDbEntries(i);
+			    int counter = 0;
 
 			    for (DbObject o : l)
 			    {
 				    p.println(parseDateFormat.format(o.dbDate) + " " + o.key + " " + o.value);
+				    counter ++;
 			    }
 
 			    p.close();
+
+			    dbString = dbString + "  " + i + ":" + counter;
 			  }
+
 				
 			}
 			catch (IOException e)
 			{
 				Dbg.println(Dbg.ERR, "dumpDb failed " + e);
 			}
+
+
+		      if (updateChannel != null)
+                      {
+                        IRCMessage m2 = new IRCMessage();
+                        m2.command = "PRIVMSG";
+                        m2.numParams = 2;
+                        m2.params[0] = updateChannel;
+                        m2.params[1] = "IRCDDB " +
+                          parseDateFormat.format(startDate) + dbString;
+
+                        IRCMessageQueue q = getSendQ();
+                        if (q != null)
+                        {
+                          q.putMessage(m2);
+                        }
+
+                      }
+
 
 		}
 	}
