@@ -551,7 +551,7 @@ public class RptrApp implements IRCDDBExtApp
 
 			if ( !zoneCS.equals("NOCALL99") &&
 			    (areaCS.charAt(6) == ' ') &&
-			    ("ABC".indexOf (areaCS.charAt(7)) >= 0) &&
+			    ("ABCD".indexOf (areaCS.charAt(7)) >= 0) &&
 			      fixTables &&
 			      !zoneCS.trim().equals(repeaterCall.trim()))
 			{

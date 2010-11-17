@@ -68,7 +68,7 @@ public class RptrUDPReceiver implements Runnable
 	  case 11:
 
 	    if ((p.getOffset() == 0) &&
-	      (data[8] == 0) && (data[10] == 0) && ("ABC".indexOf(data[9]) >= 0))
+	      (data[8] == 0) && (data[10] == 0) && ("ABCD".indexOf(data[9]) >= 0))
 	    {
 	      String cs = new String(data, 0, 8);
 	      // System.out.println("(" + cs + ")");
@@ -84,7 +84,7 @@ public class RptrUDPReceiver implements Runnable
 	  case 59:
 
 	    if ((p.getOffset() == 0) &&
-	      ("ABC".indexOf(data[18]) >= 0))
+	      ("ABCD".indexOf(data[18]) >= 0))
 	    {
 	      String myCall = new String(data, 27, 8);
 	      String myExt = new String(data, 35, 4);
