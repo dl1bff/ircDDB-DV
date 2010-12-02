@@ -81,7 +81,9 @@ public class RptrUDPReceiver implements Runnable
 	    break;
 
 	  case 39:
+	  case 40:
 	  case 59:
+	  case 60:
 
 	    if ((p.getOffset() == 0) &&
 	      ("ABCD".indexOf(data[18]) >= 0))
@@ -101,11 +103,13 @@ public class RptrUDPReceiver implements Runnable
 
 	      String info =  headerInfo.replaceAll("[^A-Z0-9/_ ]", "_");
 
-	      if (p.getLength() == 59)
+	      int len = p.getLength();
+
+	      if ((len == 59) || (len == 60))
 	      {
 		StringBuffer msg = new StringBuffer();
 
-		for (int i = 39; i < 59; i++)
+		for (int i = (len - 20); i < len; i++)
 		{
 		  int d = data[i] & 0x7F;
 
@@ -119,7 +123,14 @@ public class RptrUDPReceiver implements Runnable
 		  }
 		}
 
-		info = info + " " + msg.toString();
+		if ((len == 60) && (data[39] == 'S'))
+		{
+		  info = info + " # " + msg.toString();
+		}
+		else
+		{
+		  info = info + " " + msg.toString();
+		}
 	      }
 
 	      if (app != null)
