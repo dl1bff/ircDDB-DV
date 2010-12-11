@@ -139,7 +139,6 @@ public class RptrAppDBCheck
       List<String> t = new ArrayList<String>();
 
       t.add("sync_mng");
-      t.add("sync_mng_external");
       t.add("sync_gip");
 
       if (neededTables != null)
@@ -177,6 +176,31 @@ public class RptrAppDBCheck
 	sql.executeUpdate(
 	   "ALTER TABLE ONLY ircddb_zonerp " +
 	   " ADD CONSTRAINT pk_ircddb_zonerp PRIMARY KEY (arearp_cs)" );
+
+      }
+
+      t.addAll(t2);
+
+      t2 = new ArrayList<String>();
+
+      t2.add("sync_mng_external");
+
+      if (!checkTables(db, t2))
+      {
+	Dbg.println(Dbg.INFO, "trying to create 'sync_mng_external'");
+
+	Statement sql = db.createStatement();
+
+	sql.executeUpdate(
+	   "CREATE TABLE sync_mng_external ( " +
+	   " target_cs character(8) NOT NULL, " +
+	   " last_mod_time timestamp without time zone NOT NULL, " +
+	   " arearp_cs character(8) NOT NULL, " +
+	   " zonerp_cs character(8) NOT NULL )" );
+
+	sql.executeUpdate(
+	   "ALTER TABLE ONLY sync_mng_external " +
+	   " ADD CONSTRAINT pk_sync_mng_external PRIMARY KEY (target_cs)" );
 
       }
 
