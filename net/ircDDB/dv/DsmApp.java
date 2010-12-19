@@ -242,7 +242,7 @@ public class DsmApp implements IRCDDBExtApp
 
 	  java.text.DateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-	  if (n > n2)
+	  if (n > (n2 + 20000)) // more than 20 seconds in the future?
 	  {
 	    n = n2 | 0x3FFFFL;
 	    // a time in the future, max. 4 minutes
