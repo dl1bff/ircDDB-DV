@@ -84,6 +84,7 @@ public class RptrApp implements IRCDDBExtApp
 	Date lastMheardTime;
 
 
+
          boolean isValidCallSign(String s, Pattern p, int min_len, int max_len)
          {
 
@@ -1007,6 +1008,28 @@ public class RptrApp implements IRCDDBExtApp
 	  q.putMessage(m);
 	}
 
+      }
+    }
+
+  }
+
+  void mheardWatchdog(String wdInfo)
+  {
+    String sendTo = currentServerNick;
+
+    if ( sendTo != null)
+    {
+      IRCMessage m = new IRCMessage();
+      m.command = "PRIVMSG";
+      m.numParams = 2;
+      m.params[0] = sendTo;
+      m.params[1] = "IRCDDB WATCHDOG " + wdInfo;
+
+      IRCMessageQueue q = getSendQ();
+
+      if (q != null)
+      {
+	q.putMessage(m);
       }
     }
 

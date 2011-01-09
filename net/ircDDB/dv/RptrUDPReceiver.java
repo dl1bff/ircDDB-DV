@@ -34,11 +34,13 @@ public class RptrUDPReceiver implements Runnable
 
   RptrApp app;
   int udpPort;
+  int watchdogCounter;
 
   public RptrUDPReceiver ( RptrApp n, int port )
   {
     app = n;
     udpPort = port;
+    watchdogCounter = 0;
   }
 
   public void run()
@@ -77,6 +79,31 @@ public class RptrUDPReceiver implements Runnable
 	      {
 		app.mheardCall(cs.replaceAll("[^A-Z0-9_ ]", ""), (char) data[9], null);
 	      }
+	    }
+	    break;
+
+	  case 20:
+	    if ((p.getOffset() == 0) && (app != null))
+	    {
+	      StringBuffer msg = new StringBuffer();
+
+	      for (int i = 0; i < 20; i++)
+	      {
+		int d = data[i] & 0x7F;
+
+		if ((d > 32) && (d < 127))
+		{
+		  msg.append( (char) d );
+		}
+		else
+		{
+		  msg.append( " " );
+		}
+	      }
+
+	      app.mheardWatchdog(watchdogCounter + " " + msg.toString().trim());
+
+	      watchdogCounter = 0;
 	    }
 	    break;
 
@@ -146,6 +173,11 @@ public class RptrUDPReceiver implements Runnable
 		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""), (char) data[18], info);
 	      }
 	      
+	    }
+	    else if ((p.getOffset() == 0) &&
+	      (data[18] == 'S') && (data[34] == 'S'))
+	    {
+	      watchdogCounter ++;  // count periodical ping frame from RP2C
 	    }
 	    break;
 	    
