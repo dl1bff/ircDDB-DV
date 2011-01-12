@@ -1019,11 +1019,13 @@ public class RptrApp implements IRCDDBExtApp
 
     if ( sendTo != null)
     {
+      Date wdTime = new Date();
       IRCMessage m = new IRCMessage();
       m.command = "PRIVMSG";
       m.numParams = 2;
       m.params[0] = sendTo;
-      m.params[1] = "IRCDDB WATCHDOG " + wdInfo;
+      m.params[1] = "IRCDDB WATCHDOG: " + dbDateFormat.format(wdTime) +
+	" " +  wdInfo.replace(':', '_');
 
       IRCMessageQueue q = getSendQ();
 

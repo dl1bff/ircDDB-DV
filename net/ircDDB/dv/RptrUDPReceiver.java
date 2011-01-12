@@ -101,7 +101,7 @@ public class RptrUDPReceiver implements Runnable
 		}
 	      }
 
-	      app.mheardWatchdog(watchdogCounter + " " + msg.toString().trim());
+	      app.mheardWatchdog(msg.toString().trim() + " " + watchdogCounter);
 
 	      watchdogCounter = 0;
 	    }
