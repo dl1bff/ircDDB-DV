@@ -2,7 +2,7 @@
 
 ircDDB DV Plugins
 
-Copyright (C) 2010   Michael Dirska, DL1BFF (dl1bff@mdx.de)
+Copyright (C) 2011   Michael Dirska, DL1BFF (dl1bff@mdx.de)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ public class RptrUDPReceiver implements Runnable
 
 	      if (app != null)
 	      {
-		app.mheardCall(cs.replaceAll("[^A-Z0-9_ ]", ""), (char) data[9], null);
+		app.mheardCall(cs, (char) data[9]);
 	      }
 	    }
 	    break;
@@ -119,18 +119,11 @@ public class RptrUDPReceiver implements Runnable
 	      String myExt = new String(data, 35, 4);
 	      String yourCall = new String(data, 19, 8);
 	      String rpt2 = new String(data, 3, 8);
-
-	     //  System.out.println("rpt1 (" + rpt1 + ")");
-
-	      String headerInfo = String.format("%1$s %2$s %3$02X %4$02X %5$02X %6$s",
-		  rpt2.replace(' ', '_'),
-		  yourCall.replace(' ', '_'),
-		  data[0], data[1], data[2],
-		  myExt.replace(' ', '_'));
-
-	      String info =  headerInfo.replaceAll("[^A-Z0-9/_ ]", "_");
+	      String rpt1 = new String(data, 11, 8);
 
 	      int len = p.getLength();
+	      String tx_msg = null;
+	      boolean tx_msg_is_statistics = false;
 
 	      if ((len == 59) || (len == 60))
 	      {
@@ -152,25 +145,29 @@ public class RptrUDPReceiver implements Runnable
 
 		if ((len == 60) && (data[39] == 'S'))
 		{
-		  info = info + " # " + msg.toString();
+		  tx_msg_is_statistics = true;
 		}
-		else
-		{
-		  info = info + " " + msg.toString();
-		}
+
+		tx_msg = msg.toString();
 	      }
 
 	      if (app != null)
 	      {
 
-		if (
-		    ((data[0] == (byte) 0xFF) && (data[1] == (byte) 0xFF) && (data[2] == (byte) 0xFF))
-		    )
+		if (  (data[0] == (byte) 0xFF) &&
+		      (data[1] == (byte) 0xFF) &&
+		      (data[2] == (byte) 0xFF) )
 		{
-		  info = null;
+		  app.mheardInfo( myCall, rpt1, null, null, null,
+		    (byte) 0, (byte) 0, (byte) 0,
+		    null, false );
 		}
-
-		app.mheardCall(myCall.replaceAll("[^A-Z0-9_ ]", ""), (char) data[18], info);
+		else
+		{
+		  app.mheardInfo( myCall, rpt1, rpt2, yourCall, myExt,
+		    data[0], data[1], data[2],
+		    tx_msg, tx_msg_is_statistics );
+		}
 	      }
 	      
 	    }
@@ -184,7 +181,6 @@ public class RptrUDPReceiver implements Runnable
 	  }
 
 	}
-
 
 	s.close();
 

@@ -960,13 +960,60 @@ public class RptrApp implements IRCDDBExtApp
 		sql = null;
 	}
 
-
-  void mheardCall(String targetCS, char repeaterModule, String headerInfo)
+  void mheardCall(String rxCS, char repeaterModule)
   {
     String areaCS = repeaterCall + repeaterModule;
 
-    if ( !targetCS.substring(0,7).equals(areaCS.substring(0,7)) &&
-       isValidCallSign(targetCS, targetPattern, 3, 7) &&
+    mheardInfo (rxCS, areaCS, null, null, null,
+	(byte) 0, (byte) 0, (byte) 0,
+	null, false);
+  }
+
+
+  String checkSyncMNG (String callsign)
+  {
+    String areaCS = null;
+
+    if (sql != null)
+    {
+      try
+      {
+	ResultSet rs = sql.executeQuery("select arearp_cs, del_flg from sync_mng " +
+	      "where target_cs = '" + callsign + "'");
+
+	if (rs != null)
+	{
+	  if (rs.next())
+	  {
+	    boolean is_deleted = rs.getBoolean(2);
+
+	    if (!is_deleted)
+	    {
+	      areaCS = rs.getString(1);
+	    }
+	  }
+
+	  rs.close();
+	}
+      }
+      catch (SQLException e)
+      {
+	Dbg.println(Dbg.WARN, "DBClient/checkSyncMNG: " + e);
+      }
+
+    }
+
+    return areaCS;
+  }
+
+
+  void mheardInfo(String rxCS, String areaCS, String zoneCS, String yourCall, String rxExt,
+      byte flag0, byte flag1, byte flag2,
+      String tx_msg, boolean tx_msg_is_statistics )
+  {
+
+    if ( !rxCS.substring(0,7).equals(repeaterCall) &&
+       isValidCallSign(rxCS, targetPattern, 3, 7) &&
        isValidCallSign(areaCS, areaPattern, 4, 6) &&
          (currentServerNick != null))
     {
@@ -975,24 +1022,102 @@ public class RptrApp implements IRCDDBExtApp
       m.command = "PRIVMSG";
       m.numParams = 2;
       m.params[0] = currentServerNick;
-      m.params[1] = "UPDATE " + dbDateFormat.format(mheardTime)
-         + " " + targetCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_');
 
-      String mheardData = targetCS + areaCS;
+      String info;
 
-      if (headerInfo != null)
+      int rxCS_status = (checkSyncMNG(rxCS) == null) ?  2  :  0 ;
+
+      if ((zoneCS != null) && (yourCall != null) && (rxExt != null))
       {
-        m.params[1] = m.params[1] + " " + headerInfo;
-	mheardData = mheardData + headerInfo;
+	int yourCall_status = 0;
+	String destCS = null;
+
+	info = String.format(" %1$s %2$s %3$02X %4$02X %5$02X %6$s",
+	      zoneCS.replace(' ', '_'),
+	      yourCall.replace(' ', '_'),
+	      flag0, flag1, flag2,
+	      rxExt.replace(' ', '_')).replaceAll("[^A-Z0-9/_ ]", "_");
+
+
+	if (yourCall.length() == 8)
+	{
+	  if (yourCall.charAt(0) == '/')
+	  {
+	    String tmpCS = yourCall.substring(1,7) + " " + yourCall.charAt(7);
+
+	    if (isValidCallSign( tmpCS, areaPattern, 4, 6))
+	    {
+	      destCS = checkSyncMNG( tmpCS );
+	      if (destCS == null)
+	      {
+		yourCall_status = 1;
+	      }
+	    }
+	  }
+	  else if (!yourCall.substring(0,7).equals(repeaterCall) &&
+	      isValidCallSign(yourCall, targetPattern, 3, 7))
+	  {
+	    destCS = checkSyncMNG( yourCall );
+	    if (destCS == null)
+	    {
+	      yourCall_status = 1;
+	    }
+	  }
+	}
+
+        if ( !tx_msg_is_statistics && ((yourCall_status != 0) || (destCS != null)))
+	{
+	  String tmpCS = "________";
+
+	  if (destCS != null)
+	  {
+	    tmpCS = destCS.replaceAll("[^A-Z0-9/]", "_");
+	  }
+
+	  info = info + String.format(" %1$02X %2$s", yourCall_status, tmpCS);
+	}
+
+	if (tx_msg != null)
+	{
+	  if (tx_msg_is_statistics)
+	  {
+	    info = info + " # " + tx_msg; // do not send status with statistics
+	  }
+	  else
+	  {
+	    info = String.format(" %1$01X", rxCS_status) + info + " " + tx_msg;
+	  }
+	}
+	else
+	{
+	  info = String.format(" %1$01X", rxCS_status) + info;
+	}
+      }
+      else
+      {
+	info = String.format(" %1$01X", rxCS_status);
+      }
+
+      m.params[1] = "UPDATE " + dbDateFormat.format(mheardTime)
+         + " " + rxCS.replace(' ', '_') + " " +  areaCS.replace(' ', '_') + info;
+
+      String mheardData;
+      if (tx_msg_is_statistics)
+      {
+	mheardData = rxCS + areaCS + "S";
+      }
+      else
+      {
+	mheardData = rxCS + areaCS;
       }
 
       boolean sendPacket = true;
 
       if (mheardData.equals(lastMheardData))
       {
-	if (mheardTime.getTime() < (lastMheardTime.getTime() + 4000L))
+	if (mheardTime.getTime() < (lastMheardTime.getTime() + 3000L))
 	{
-	  sendPacket = false;  // send same packet max. once in 4 seconds
+	  sendPacket = false;  // send same packet max. once in 3 seconds
 	}
       }
 
