@@ -2,7 +2,7 @@
 
 ircDDB
 
-Copyright (C) 2010   Michael Dirska, DL1BFF (dl1bff@mdx.de)
+Copyright (C) 2011   Michael Dirska, DL1BFF (dl1bff@mdx.de)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -457,12 +457,12 @@ public class MemDB implements IRCDDBExtApp
 		    }
 		  }
 		}
-		else if (tableID == 1)
+		else if ((tableID == 1) || (tableID == 2))
 		{
 		  if ((ircUser != null) && (!ircUser.startsWith("s-")))
 		      // only accept updates via channel, bootfile or "s-" user
 		  {
-		    Dbg.println(Dbg.DBG1, "not accepting UPDATE for tableID=1");
+		    Dbg.println(Dbg.DBG1, "not accepting UPDATE for tableID=" + tableID);
 		    return null;
 		  }
 		}
