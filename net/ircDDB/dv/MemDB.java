@@ -416,6 +416,7 @@ public class MemDB implements IRCDDBExtApp
 
 	public IRCDDBExtApp.UpdateResult dbUpdate( int tableID, Date d, String k, String v, String ircUser )
 	{
+	  boolean hideFromLog = true;
 
 		if (tableID == 0)
 		{
@@ -454,6 +455,16 @@ public class MemDB implements IRCDDBExtApp
 			}
 
 		      }
+		    }
+		  }
+
+		  if (db.get(2).containsKey(k))
+		  {
+		    DbObject o = db.get(2).get(k);
+
+		    if (o.value.startsWith("X"))
+		    {
+		      hideFromLog = false;
 		    }
 		  }
 		}
@@ -520,6 +531,7 @@ public class MemDB implements IRCDDBExtApp
 		db.get(tableID).put (k, n);
 
 		result.newObj = newObj;
+		result.hideFromLog = hideFromLog;
 		
 		return result;
 	}

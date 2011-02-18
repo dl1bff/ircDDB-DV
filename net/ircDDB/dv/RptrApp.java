@@ -2,7 +2,7 @@
 
 ircDDB DV Plugins
 
-Copyright (C) 2010   Michael Dirska, DL1BFF (dl1bff@mdx.de)
+Copyright (C) 2011   Michael Dirska, DL1BFF (dl1bff@mdx.de)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -408,6 +408,7 @@ public class RptrApp implements IRCDDBExtApp
 	  IRCDDBExtApp.DatabaseObject o = new IRCDDBExtApp.DatabaseObject();
 
 	  r.keyWasNew = insertNewEntry;
+	  r.hideFromLog = false;
 	  r.newObj = n;
 	  r.oldObj = o;
 
@@ -734,6 +735,7 @@ public class RptrApp implements IRCDDBExtApp
 		IRCDDBExtApp.DatabaseObject o = new IRCDDBExtApp.DatabaseObject();
 
 		r.keyWasNew = insertNewEntry;
+		r.hideFromLog = false;
 		r.newObj = n;
 		r.oldObj = o;
 
