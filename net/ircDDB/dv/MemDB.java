@@ -458,13 +458,16 @@ public class MemDB implements IRCDDBExtApp
 		    }
 		  }
 
-		  if (db.get(2).containsKey(k))
+		  if (numberOfTables >= 3) //  ddb_num_tables >= 3
 		  {
-		    DbObject o = db.get(2).get(k);
-
-		    if (o.value.startsWith("X"))
+		    if (db.get(2).containsKey(k))
 		    {
-		      hideFromLog = false;
+		      DbObject o = db.get(2).get(k);
+
+		      if (o.value.startsWith("X"))
+		      {
+			hideFromLog = false;
+		      }
 		    }
 		  }
 		}
