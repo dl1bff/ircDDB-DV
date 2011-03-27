@@ -80,7 +80,7 @@ public class DsmApp implements IRCDDBExtApp
 	  return null;
   }
 	
-  public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser)
+  public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser, String msg)
   {
 	  return null;
   }

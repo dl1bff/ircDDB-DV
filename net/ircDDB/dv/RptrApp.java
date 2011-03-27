@@ -311,7 +311,7 @@ public class RptrApp implements IRCDDBExtApp
 	}
 
 
-	IRCDDBExtApp.UpdateResult dbUpdate1(int tableID, Date d, String k, String v, String ircUser)
+	IRCDDBExtApp.UpdateResult dbUpdate1(int tableID, Date d, String k, String v, String ircUser, String msg)
 	{
 	  if (state < 2)
 	  {
@@ -429,11 +429,11 @@ public class RptrApp implements IRCDDBExtApp
 	}
 
 
-	public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser)
+	public IRCDDBExtApp.UpdateResult dbUpdate(int tableID, Date d, String k, String v, String ircUser, String msg)
 	{
 	  if (tableID == 1)
 	  {
-	    return dbUpdate1( tableID, d, k, v, ircUser );
+	    return dbUpdate1( tableID, d, k, v, ircUser, msg );
 	  }
 	  else if (tableID != 0)
 	  {

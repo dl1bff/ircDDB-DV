@@ -58,7 +58,7 @@ import net.ircDDB.IRCMessageQueue;
 import net.ircDDB.IRCDDBExtApp;
 
 
-public class MemDB implements IRCDDBExtApp
+public class MemDB implements IRCDDBExtApp, CallSignVisibilityChecker
 {
 
 	int numberOfTables;
@@ -79,6 +79,7 @@ public class MemDB implements IRCDDBExtApp
 	String updateChannel;
 
 
+	UpdateMessageParser ump;
 	
 	public MemDB()
 	{
@@ -95,6 +96,8 @@ public class MemDB implements IRCDDBExtApp
 	  queryPlugin = null;
 
 	  updateChannel = null;
+
+	  ump = new UpdateMessageParser(this);
 	}
 		
 	public boolean setParams( Properties p, int numTables, Pattern[] keyPattern, Pattern[] valuePattern)
@@ -253,7 +256,7 @@ public class MemDB implements IRCDDBExtApp
 						// DbObject o = new DbObject( dbDate, key, value );
 						// db.put(key, o);
 
-						dbUpdate( tableID, dbDate, key, value, null );
+						dbUpdate( tableID, dbDate, key, value, null, null );
 					}
 				}
 			}
@@ -414,7 +417,28 @@ public class MemDB implements IRCDDBExtApp
 	}
 
 
-	public IRCDDBExtApp.UpdateResult dbUpdate( int tableID, Date d, String k, String v, String ircUser )
+	public boolean isCallSignVisible( String cs )
+	{
+	  boolean visible = false;
+
+	  if (numberOfTables >= 3) //  ddb_num_tables >= 3
+	  {
+	    if (db.get(2).containsKey(cs))
+	    {
+	      DbObject o = db.get(2).get(cs);
+
+	      if (o.value.startsWith("X"))
+	      {
+		visible = true;
+	      }
+	    }
+	  }
+
+	  return visible;
+	}
+
+
+	public IRCDDBExtApp.UpdateResult dbUpdate( int tableID, Date d, String k, String v, String ircUser, String msg )
 	{
 	  boolean hideFromLog = true;
 
@@ -458,17 +482,9 @@ public class MemDB implements IRCDDBExtApp
 		    }
 		  }
 
-		  if (numberOfTables >= 3) //  ddb_num_tables >= 3
+		  if (isCallSignVisible(k))
 		  {
-		    if (db.get(2).containsKey(k))
-		    {
-		      DbObject o = db.get(2).get(k);
-
-		      if (o.value.startsWith("X"))
-		      {
-			hideFromLog = false;
-		      }
-		    }
+		    hideFromLog = false;
 		  }
 		}
 		else if ((tableID == 1) || (tableID == 2))
@@ -535,6 +551,16 @@ public class MemDB implements IRCDDBExtApp
 
 		result.newObj = newObj;
 		result.hideFromLog = hideFromLog;
+
+	
+		String logLine = null;
+
+		if (msg != null)
+		{
+		  logLine = ump.parseAndModify(msg);
+		}
+
+		result.modifiedLogLine = logLine;
 		
 		return result;
 	}
