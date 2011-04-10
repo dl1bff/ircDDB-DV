@@ -1054,6 +1054,10 @@ public class RptrApp implements IRCDDBExtApp
 	      {
 		yourCall_status = 1;
 	      }
+	      else
+	      {
+		destCS = tmpCS;  // area_rp holds wrong info in this case
+	      }
 	    }
 	  }
 	  else if (!yourCall.substring(0,7).equals(repeaterCall) &&
