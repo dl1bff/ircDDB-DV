@@ -70,6 +70,7 @@ public class CallSignValidator
 
   Pattern areaPattern;
   Pattern targetPattern;
+  Pattern starnetPattern;
 
 
   public CallSignValidator()
@@ -78,6 +79,8 @@ public class CallSignValidator
      "^(([1-9][A-Z])|([A-Z][0-9])|([A-Z][A-Z][0-9]))[0-9A-Z]*[A-Z][ ]*[A-RT-Z]$");
     targetPattern = Pattern.compile(
      "^(([1-9][A-Z])|([A-Z][0-9])|([A-Z][A-Z][0-9]))[0-9A-Z]*[A-Z][ ]*[ A-RT-Z]$");
+    starnetPattern = Pattern.compile(
+     "^STN[0-9][0-9][0-9] [ A-RT-Z]$");
   }
 
 
@@ -87,8 +90,10 @@ public class CallSignValidator
     String targetCS = k.replace('_', ' ');
     String areaCS = v.replace('_', ' ');
 
+    boolean validSourceCall = isValidCallSign(targetCS, targetPattern, 3, 7)
+	||  isValidCallSign(targetCS, starnetPattern, 6, 6) ;
 
-    if (!isValidCallSign(targetCS, targetPattern, 3, 7))
+    if (! validSourceCall )
     {
       Dbg.println(Dbg.DBG1, "targetCS does not comply with call sign rules");
       return false;
