@@ -444,14 +444,14 @@ public class MemDB implements IRCDDBExtApp, CallSignVisibilityChecker
 
 		if (tableID == 0)
 		{
-		  if (!validator.isValid(k, v, ircUser))
-		  {
-		    Dbg.println(Dbg.DBG1, "invalid " + k + " " + v);
-		    return null;
-		  }
 
 		  if (!db.get(1).containsKey(v))
 		  {
+		    if (!validator.isValid(k, v, ircUser))
+		    {
+		      Dbg.println(Dbg.DBG1, "invalid " + k + " " + v);
+		      return null;
+		    }
 		    Dbg.println(Dbg.DBG1, v + " not found");
 
 		    String zonerp_cs = getZoneRPCS( v, ircUser );
@@ -479,6 +479,55 @@ public class MemDB implements IRCDDBExtApp, CallSignVisibilityChecker
 			}
 
 		      }
+		    }
+		  }
+		  else
+		  {
+		    if (!validator.isValid(k, v, null))
+		    {
+		      Dbg.println(Dbg.DBG1, "target callsign invalid " + k + " " + v);
+		      return null;
+		    }
+		      
+		    if (ircUser != null)
+		    {
+			int p = ircUser.indexOf('-');
+			boolean sUserAllowed = false;
+
+			if (p == 1)
+			{
+			  if ( ircUser.substring(0,p).equals("s") )
+			  {
+			    Dbg.println(Dbg.DBG2, "allow 's-' user: " + ircUser);
+			    sUserAllowed = true;
+			  }
+			  else
+			  {
+			    Dbg.println(Dbg.DBG1, "invalid sender: " + ircUser);
+			    return null;
+			  }
+			}
+
+			if ((p < 4) && (p > 6))
+			{
+			   Dbg.println(Dbg.DBG1, "login not a repeater: " + ircUser);
+			   return null;
+			}
+
+			String zonerp_cs = ircUser.substring(0, p).toUpperCase();
+
+			while (zonerp_cs.length() < 8)
+			{
+			    zonerp_cs = zonerp_cs + "_";
+			}
+
+			DbObject o = db.get(1).get(v);
+
+			if ((!sUserAllowed) && (! o.value.equals( zonerp_cs )))
+			{
+			    Dbg.println(Dbg.DBG1, "wrong repeater: " + ircUser + " " + zonerp_cs + " " + v);
+			return null;
+			}
 		    }
 		  }
 
