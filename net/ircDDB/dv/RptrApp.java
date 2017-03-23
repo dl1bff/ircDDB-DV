@@ -148,18 +148,24 @@ public class RptrApp implements IRCDDBExtApp
 
 			try
 			{
-			    int r = sql.executeUpdate (
+			    Statement sql2 = db.createStatement();
+
+
+			    int r = sql2.executeUpdate (
                                 "update sync_gip set zonerp_ipaddr='" + host +
                                  "' where zonerp_cs='" + callsign + "'");
 
 			    if ((r != 1) && fixTables)
 			    {
-			    	ResultSet rs = sql.executeQuery("select zonerp_cs from "+
+			    	ResultSet rs = sql2.executeQuery("select zonerp_cs from "+
 					"sync_gip where zonerp_cs='" + callsign + "'");
 
 				if ((rs != null) && !rs.next())
 				{
-					r = sql.executeUpdate ("insert into sync_gip values('" +
+					rs.close();
+					rs = null;
+
+					r = sql2.executeUpdate ("insert into sync_gip values('" +
 						callsign + "', now(), now(), now(), '" + host +
 						"', false)");
 
@@ -181,12 +187,15 @@ public class RptrApp implements IRCDDBExtApp
 
 				if (fixUnsyncGIP)
 				{
-			    	rs = sql.executeQuery("select zonerp_cs from "+
+			    	rs = sql2.executeQuery("select zonerp_cs from "+
 					"unsync_gip where zonerp_cs='" + callsign + "'");
 
 				if ((rs != null) && !rs.next())
 				{
-					r = sql.executeUpdate ("insert into unsync_gip values('" +
+					rs.close();
+					rs = null;
+
+					r = sql2.executeUpdate ("insert into unsync_gip values('" +
 						callsign + "', now(), now(), " +
 						 "'1970-01-01 00:00:00', true, true)");
 
@@ -209,6 +218,8 @@ public class RptrApp implements IRCDDBExtApp
 
 				
 			    }
+
+			    sql2.close();
 			}
 			catch (SQLException e)
 			{
